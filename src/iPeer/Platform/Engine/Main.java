@@ -1,6 +1,7 @@
 package iPeer.Platform.Engine;
 
 import iPeer.Platform.Graphics.Colour;
+import iPeer.Platform.Graphics.SpriteHandler;
 
 import java.awt.BorderLayout;
 import java.awt.Canvas;
@@ -15,6 +16,7 @@ public class Main extends Canvas implements Runnable {
 	private static final long serialVersionUID = 1L;
 	private int lastticks = 0, lastfps = 0;
 	public boolean isRunning = false;
+	SpriteHandler spritehandler = new SpriteHandler();
 
 	// InputHandler input;
 
@@ -56,6 +58,8 @@ public class Main extends Canvas implements Runnable {
 
 	public void init() {
 
+		spritehandler.createSpriteSheet("iPeer/Platform/Graphics/sprites.png");
+		
 	}
 
 	@Override
@@ -69,7 +73,7 @@ public class Main extends Canvas implements Runnable {
 		 * Dividing by 60, will limit the game to 60 renders/sec 30 will limit
 		 * it to 30, 100 to 100 and so on.
 		 */
-		double nsPerTick = 1000000000 / 59.0;
+		double nsPerTick = 1000000000 / 60.0;
 		int frames = 0;
 		int ticks = 0;
 		long lastTick = System.currentTimeMillis();
@@ -98,7 +102,7 @@ public class Main extends Canvas implements Runnable {
 			if (System.currentTimeMillis() - lastTick > 1000) {
 				lastTick = System.currentTimeMillis();
 				// Output the tick & FPS counts (debug).
-				System.out.println(ticks + "ticks, " + frames + " fps");
+				System.out.println(ticks + " ticks, " + frames + " fps");
 				lastfps = frames;
 				lastticks = ticks;
 				frames = ticks = 0; // reset them both to 0.
@@ -121,11 +125,14 @@ public class Main extends Canvas implements Runnable {
 		Graphics g = bs.getDrawGraphics();
 
 		// This will render the game screen black
-		g.setColor(Colour.PINK);
+		g.setColor(Colour.BLACK);
 		g.fillRect(0, 0, getWidth(), getHeight());
 		g.setColor(Colour.WHITE);
 		g.drawString(lastfps + " (" + lastticks + ")", 0, getHeight() - 1);
 
+		g.drawImage(SpriteHandler.getSpriteFromSheet(0, 0, 16, 16), 56, 90, null);// Colour.BLACK, null);
+		g.drawImage(SpriteHandler.getSpriteFromSheet(2, 0, 16, 16), 56, 150, null);// Colour.BLACK, null);
+		g.drawImage(SpriteHandler.getSpriteFromSheet(4, 6, 16, 16), 150, 90, null);// Colour.BLACK, null);
 		// Do your rendering here. (using g)
 
 		g.dispose();
