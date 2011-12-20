@@ -1,26 +1,26 @@
 package iPeer.Platform.Engine;
 
+import java.awt.event.InputMethodListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.ArrayList;
 
 public class InputHandler implements KeyListener {
 
-	public ArrayList<Key> keys = new ArrayList<Key>();
-
 	public class Key {
 
 		public boolean down, pressed, pressed1;
 		public int presses, multi;
 
+		@SuppressWarnings("unchecked")
 		public Key() {
 			keys.add(this);
 		}
 
 		public void toggle(boolean flag) {
-			if (down != pressed)
-				down = pressed;
-			if (pressed)
+			if (down != flag)
+				down = flag;
+			if (flag)
 				presses++;
 		}
 
@@ -35,55 +35,84 @@ public class InputHandler implements KeyListener {
 
 	}
 
-	public Key left = new Key();
-	public Key right = new Key();
-	public Key up = new Key();
-	public Key down = new Key();
-	public Key jump = new Key();
+	public ArrayList keys;
+	public Key left;
+	public Key right;
+	public Key up;
+	public Key down;
+	public Key jump;
+	public Key debug;
+	public Key rendering;
+
+	public void tick() {
+		for (int i = 0; i < keys.size(); i++) {
+			((Key) keys.get(i)).tick();
+		}
+	}
+
+	public void releaseAll() {
+		for (int i = 0; i < keys.size(); i++) {
+			((Key) keys.get(i)).down = false;
+		}
+	}
 
 	public InputHandler(Main main) {
+		keys = new ArrayList();
+		up = new Key();
+		left = new Key();
+		right = new Key();
+		up = new Key();
+		down = new Key();
+		jump = new Key();
+		debug = new Key();
+		rendering = new Key();
 		main.addKeyListener(this);
-	}
-	
-	private void toggle(Key ke, boolean flag) {
-		ke.toggle(flag);	
 	}
 
 	public void keyPressed(KeyEvent e) {
-		int k = e.getKeyCode();
-		if (k == KeyEvent.VK_W) toggle(up, true);
-		if (k == KeyEvent.VK_A) toggle(right, true);
-		if (k == KeyEvent.VK_D) toggle(left, true);
-		if (k == KeyEvent.VK_S) toggle(down, true);
-		if (k == KeyEvent.VK_UP) toggle(up, true);
-		if (k == KeyEvent.VK_RIGHT) toggle(right, true);
-		if (k == KeyEvent.VK_LEFT) toggle(left, true);
-		if (k == KeyEvent.VK_DOWN) toggle(down, true);
-		
-		if (k == KeyEvent.VK_SPACE) toggle(jump, true);
-		if (k == KeyEvent.VK_J) toggle(jump, true);
+		toggle(e, true);
 	}
 
 	@Override
 	public void keyReleased(KeyEvent e) {
-		int k = e.getKeyCode();
-		if (k == KeyEvent.VK_W) toggle(up, false);
-		if (k == KeyEvent.VK_A) toggle(right, false);
-		if (k == KeyEvent.VK_D) toggle(left, false);
-		if (k == KeyEvent.VK_S) toggle(down, false);
-		if (k == KeyEvent.VK_UP) toggle(up, false);
-		if (k == KeyEvent.VK_RIGHT) toggle(right, false);
-		if (k == KeyEvent.VK_LEFT) toggle(left, false);
-		if (k == KeyEvent.VK_DOWN) toggle(down, false);
-		
-		if (k == KeyEvent.VK_SPACE) toggle(jump, false);
-		if (k == KeyEvent.VK_J) toggle(jump, false);
+		toggle(e, false);
 	}
 
 	@Override
 	public void keyTyped(KeyEvent e) {
-		// TODO Auto-generated method stub
-
 	}
+	
+	private void toggle(KeyEvent ke, boolean flag) {
+		int k = ke.getKeyCode();
+		if (k == KeyEvent.VK_W)
+			up.toggle(flag);
+		if (k == KeyEvent.VK_A)
+			left.toggle(flag);
+		if (k == KeyEvent.VK_D)
+			right.toggle(flag);
+		if (k == KeyEvent.VK_S)
+			down.toggle(flag);
+		if (k == KeyEvent.VK_UP)
+			up.toggle(flag);
+		if (k == KeyEvent.VK_RIGHT)
+			right.toggle(flag);
+		if (k == KeyEvent.VK_LEFT)
+			left.toggle(flag);
+		if (k == KeyEvent.VK_DOWN)
+			down.toggle(flag);
+
+		if (k == KeyEvent.VK_SPACE)
+			jump.toggle(flag);
+		if (k == KeyEvent.VK_J)
+			jump.toggle(flag);
+		
+		if (k == KeyEvent.VK_F3) {
+			debug.toggle(flag);
+		}
+		if (k == KeyEvent.VK_F4) {
+			rendering.toggle(flag);
+		}
+	}
+
 
 }

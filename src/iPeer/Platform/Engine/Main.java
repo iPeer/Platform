@@ -1,5 +1,7 @@
 package iPeer.Platform.Engine;
 
+import iPeer.Platform.Entities.Entity;
+import iPeer.Platform.Entities.EntityPlayer;
 import iPeer.Platform.Graphics.Colour;
 import iPeer.Platform.Graphics.SpriteHandler;
 
@@ -8,6 +10,7 @@ import java.awt.Canvas;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferStrategy;
+import java.util.ArrayList;
 
 import javax.swing.JFrame;
 
@@ -17,12 +20,16 @@ public class Main extends Canvas implements Runnable {
 	private int lastticks = 0, lastfps = 0;
 	public boolean isRunning = false;
 	SpriteHandler spritehandler = new SpriteHandler();
-
-	// InputHandler input;
+	Entity player;
+	InputHandler input;
+	private ArrayList<Entity> entities = new ArrayList<Entity>();
+	private ArrayList<Entity> removeList = new ArrayList<Entity>();
+	private boolean showDebugStuff = false, renderingEnabled = true;
+	private long debugLastPressed = System.currentTimeMillis();
 
 	public Main() {
-		/* input = new InputHandler(this); */
-
+		Debug.p("Main Init");
+		input = new InputHandler(this);
 	}
 
 	// start() & stop() are compatibility for Applets.
@@ -42,7 +49,7 @@ public class Main extends Canvas implements Runnable {
 		Main main = new Main();
 		main.setMaximumSize(new Dimension(854, 480));
 		main.setPreferredSize(new Dimension(854, 480));
-		JFrame frame = new JFrame("Game Engine"); // Change Game Engine to your
+		JFrame frame = new JFrame("Platform"); // Change Game Engine to your
 													// game's name!
 		frame.setDefaultCloseOperation(3);
 		frame.setLayout(new BorderLayout());
@@ -59,7 +66,10 @@ public class Main extends Canvas implements Runnable {
 	public void init() {
 
 		spritehandler.createSpriteSheet("iPeer/Platform/Graphics/sprites.png");
-		
+
+		player = new EntityPlayer(this, input, "Player", 20, 40, 0, 0, 32, 32);
+		entities.add(player);
+
 	}
 
 	@Override
@@ -112,7 +122,28 @@ public class Main extends Canvas implements Runnable {
 	}
 
 	public void tick() {
-		// Do stuff that should be only ran so often here.
+
+		// Perform input ticks
+
+		input.tick();
+
+		if (input.debug.down && (System.currentTimeMillis() - debugLastPressed > 150)) {
+			showDebugStuff = !showDebugStuff;
+			debugLastPressed = System.currentTimeMillis();
+		}
+		
+		if (input.rendering.down && (System.currentTimeMillis() - debugLastPressed > 150)) {
+			renderingEnabled = !renderingEnabled;
+			debugLastPressed = System.currentTimeMillis();
+		}
+
+		// Perform the ticks of each entity
+
+		for (int i = 0; i < entities.size(); i++) {
+			Entity e = entities.get(i);
+			e.tick();
+		}
+
 	}
 
 	public void render() {
@@ -130,11 +161,41 @@ public class Main extends Canvas implements Runnable {
 		g.setColor(Colour.WHITE);
 		g.drawString(lastfps + " (" + lastticks + ")", 0, getHeight() - 1);
 
-		g.drawImage(SpriteHandler.getSpriteFromSheet(0, 0, 16, 16), 56, 90, null);// Colour.BLACK, null);
-		g.drawImage(SpriteHandler.getSpriteFromSheet(2, 0, 16, 16), 56, 150, null);// Colour.BLACK, null);
-		g.drawImage(SpriteHandler.getSpriteFromSheet(4, 6, 16, 16), 150, 90, null);// Colour.BLACK, null);
-		// Do your rendering here. (using g)
+		if (renderingEnabled) {
 
+			g.drawImage(SpriteHandler.getSpriteFromSheet(0, 0, 16, 16), 56, 90,
+					null);// Colour.BLACK, null);
+			g.drawImage(SpriteHandler.getSpriteFromSheet(2, 0, 16, 16), 56,
+					150, null);// Colour.BLACK, null);
+			g.drawImage(SpriteHandler.getSpriteFromSheet(4, 6, 16, 16), 150,
+					90, null);// Colour.BLACK, null);
+			// Do your rendering here. (using g)
+
+			// Draw entities
+			for (int i = 0; i < entities.size(); i++) {
+				Entity e = entities.get(i);
+				e.render(g);
+			}
+		}
+		else {
+			g.setColor(Colour.RED);
+			String str = "Rending is disabled. Press F4 to re-enable rendering.";
+			g.drawString(str, (getWidth() - g.getFontMetrics().stringWidth(str)) / 2, 10);
+		}
+		// Render debug last, so it is always on top.
+		if (showDebugStuff) {
+			g.setColor(Colour.WHITE);
+			g.drawString("ENTITIES (" + entities.size() + ")", 2, 20);
+			int strpos = 30;
+			for (int e = 0; e < entities.size(); e++) {
+				Entity e1 = entities.get(e);
+				g.drawString("ID: " + e + ", \"" + e1.getName() + "\", "
+						+ e1.getX() + ", " + e1.getY() + ", " + e1.getXA()
+						+ ", " + e1.getYA() + ", " + e1.spriteWidth()
+						+ ", " + e1.spriteHeight(), 2, strpos);
+				strpos += 10;
+			}
+		}
 		g.dispose();
 		bs.show();
 

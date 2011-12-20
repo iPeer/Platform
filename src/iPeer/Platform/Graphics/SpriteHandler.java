@@ -6,12 +6,15 @@ import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 
 import javax.imageio.ImageIO;
 
 public class SpriteHandler {
 
 	static BufferedImage spritesheet;
+	//static HashMap<Integer, Integer> imagecache = new HashMap<Integer, Integer>();
+	static BufferedImage[][][][] imagecache = new BufferedImage[16][16][256][256];
 
 	public SpriteHandler() {
 	}
@@ -31,8 +34,14 @@ public class SpriteHandler {
 	}
 
 	public static Image getSpriteFromSheet(int x, int y, int r, int c) {
-		BufferedImage sprite = spritesheet.getSubimage(x*r, y*c, r, c);
-		return (Image)sprite;
+		BufferedImage sprite;
+		if (imagecache[x][y][r][c] != null) {
+			return (Image)imagecache[x][y][r][c];
+		}
+			Debug.p("Image not in cache.");
+			sprite = spritesheet.getSubimage(x*r, y*c, r, c);
+			imagecache[x][y][r][c] = sprite;
+			return (Image)sprite;
 	}
 
 }

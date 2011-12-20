@@ -6,10 +6,6 @@ import java.awt.color.ColorSpace;
 public class Colour extends Color {
 	
 	private static final long serialVersionUID = -4227268747401926577L;
-	
-	public static Color WHITE = new Color(255, 255, 255);
-	public static Color BLACK = new Color(0, 0, 0);
-	public static Color PINK = Color.pink;
 
 	
 	public Color getColour(int r, int g, int b) {

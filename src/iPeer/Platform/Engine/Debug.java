@@ -1,5 +1,6 @@
 package iPeer.Platform.Engine;
 
+import java.awt.event.InputMethodListener;
 import java.io.File;
 import java.net.URL;
 
@@ -22,6 +23,9 @@ public class Debug {
 	}
 	public static void p(URL u) {
 		System.out.println(u);	
+	}
+	public static void p(InputMethodListener i) {
+		System.out.println(i);
 	}
 	
 	
