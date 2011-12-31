@@ -92,7 +92,8 @@ public abstract class Entity {
 	}
 	
 	public boolean entityCanMoveHere() {
-		return !((getX() <= 0) && (getX() >= main.getWidth()-spriteWidth()) && (getY() <= 0) && (getY() >= main.getWidth()-spriteHeight()));
+		return true;
+		//return !((getX() <= 0) && (getX() >= main.getWidth()-spriteWidth()) && (getY() <= 0) && (getY() >= main.getWidth()-spriteHeight()));
 	}
 
 
@@ -101,5 +102,10 @@ public abstract class Entity {
 	}
 
 	public abstract void collidedWith(Entity other);
+
+	public boolean isOnScreen() {
+		return true;
+		//return ((getX() <= main.getWidth()+1 && getX() >= 0-spriteWidth())  || (getY() <= main.getHeight()+1  && getY() >= 0-spriteHeight()));
+	}
 
 }

@@ -4,6 +4,7 @@ import iPeer.Platform.Entities.Entity;
 import iPeer.Platform.Entities.EntityPlayer;
 import iPeer.Platform.Graphics.Colour;
 import iPeer.Platform.Graphics.SpriteHandler;
+import iPeer.Platform.World.Level;
 
 import java.awt.BorderLayout;
 import java.awt.Canvas;
@@ -26,6 +27,10 @@ public class Main extends Canvas implements Runnable {
 	private ArrayList<Entity> removeList = new ArrayList<Entity>();
 	private boolean showDebugStuff = false, renderingEnabled = true;
 	private long debugLastPressed = System.currentTimeMillis();
+	private Level level;
+	private Level[] levels;
+	public int currentLevel;
+	public static int HEIGHT = 480, WIDTH = 854;
 
 	public Main() {
 		Debug.p("Main Init");
@@ -57,7 +62,7 @@ public class Main extends Canvas implements Runnable {
 		// addKeyListener(new InputHandler(this));
 
 		frame.pack();
-		frame.setResizable(true); // change to true if you want users to be able
+		frame.setResizable(false); // change to true if you want users to be able
 									// to resize the window.
 		frame.setVisible(true);
 		main.start();
@@ -66,12 +71,21 @@ public class Main extends Canvas implements Runnable {
 	public void init() {
 
 		spritehandler.createSpriteSheet("iPeer/Platform/Graphics/sprites.png");
-
-		player = new EntityPlayer(this, input, "Player", 20, 40, 0, 0, 32, 32);
-		entities.add(player);
+		resetGame();
 
 	}
 
+	public void resetGame() {
+		currentLevel = 0;
+		levels = new Level[10];
+		levels[0] = new Level(getWidth(), getHeight(), 0);
+		player = new EntityPlayer(this, input, "Player", 20, 40, 0, 0, 32, 32);
+		level = levels[currentLevel];
+		//entities.add(player);
+		level.add(player);
+		
+	}
+	
 	@Override
 	public void run() {
 		long lastTime = System.nanoTime();
@@ -112,7 +126,7 @@ public class Main extends Canvas implements Runnable {
 			if (System.currentTimeMillis() - lastTick > 1000) {
 				lastTick = System.currentTimeMillis();
 				// Output the tick & FPS counts (debug).
-				System.out.println(ticks + " ticks, " + frames + " fps");
+				//System.out.println(ticks + " ticks, " + frames + " fps");
 				lastfps = frames;
 				lastticks = ticks;
 				frames = ticks = 0; // reset them both to 0.
@@ -126,6 +140,7 @@ public class Main extends Canvas implements Runnable {
 		// Perform input ticks
 
 		input.tick();
+		level.tick();
 
 		if (input.debug.down && (System.currentTimeMillis() - debugLastPressed > 150)) {
 			showDebugStuff = !showDebugStuff;
@@ -163,19 +178,15 @@ public class Main extends Canvas implements Runnable {
 
 		if (renderingEnabled) {
 
-			g.drawImage(SpriteHandler.getSpriteFromSheet(0, 0, 16, 16), 56, 90,
-					null);// Colour.BLACK, null);
-			g.drawImage(SpriteHandler.getSpriteFromSheet(2, 0, 16, 16), 56,
-					150, null);// Colour.BLACK, null);
-			g.drawImage(SpriteHandler.getSpriteFromSheet(4, 6, 16, 16), 150,
-					90, null);// Colour.BLACK, null);
 			// Do your rendering here. (using g)
 
 			// Draw entities
-			for (int i = 0; i < entities.size(); i++) {
+			/*for (int i = 0; i < entities.size(); i++) {
 				Entity e = entities.get(i);
 				e.render(g);
-			}
+			}*/
+			level.renderOnScreenEntities(g);
+			level.renderOnScreenBlocks(WIDTH, HEIGHT, g, level);
 		}
 		else {
 			g.setColor(Colour.RED);
@@ -185,10 +196,11 @@ public class Main extends Canvas implements Runnable {
 		// Render debug last, so it is always on top.
 		if (showDebugStuff) {
 			g.setColor(Colour.WHITE);
-			g.drawString("ENTITIES (" + entities.size() + ")", 2, 20);
-			int strpos = 30;
-			for (int e = 0; e < entities.size(); e++) {
-				Entity e1 = entities.get(e);
+			g.drawString("B: "+level.blockCount, 2, 10);
+			g.drawString("ENTITIES (" + level.entities.size() + ")", 2, 40);
+			int strpos = 50;
+			for (int e = 0; e < level.entities.size(); e++) {
+				Entity e1 = (Entity)level.entities.get(e);
 				g.drawString("ID: " + e + ", \"" + e1.getName() + "\", "
 						+ e1.getX() + ", " + e1.getY() + ", " + e1.getXA()
 						+ ", " + e1.getYA() + ", " + e1.spriteWidth()
@@ -199,6 +211,10 @@ public class Main extends Canvas implements Runnable {
 		g.dispose();
 		bs.show();
 
+	}
+	
+	public static boolean isOnScreen(int x, int y) {
+		return ((x <= WIDTH) && (x >= 0)) && ((y <= HEIGHT) && (y >= 0));
 	}
 
 }
